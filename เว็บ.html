@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>ไม่ประสงค์ออกนาม</title>
+</head>
+
+<body>
+
+<h1 style="text-align:center;">ยินดีต้อนรับเข้าสู่เว็บไซน์ไม่ประสงค์ออกนาม</h1><br>
+<h2>HC-SR04</h2>
+<div align = "center"><img src="01.png"></img></div>
+<p>โมดูลอัลตร้าโซนิคนี้เป็นอุปกรณ์ใช้วัดระยะทางโดยไม่ต้องมีการสัมผัสกับตำแหน่งที่ต้องการวัด วัดได้ตั้งแต่ 2 cm ถึง 400 cm โดยส่งสัญญาณอัลตร้าโซนิคความถี่ 40 kHz ไปที่วัตถุที่ต้องการวัดและรับสัญญาณที่สะท้อนกลับมา พร้อมทั้งจับเวลาเพื่อนำมาใช้ในการคำนวณระยะทาง</p>
+<h2>คุณสมบัติของ HC-SR04</h2>
+<p>แรงดันที่ใช้ในการทำงาน	5V<br>
+กระแสไฟฟ้าที่ใช้	15mA<br>
+คลื่นความถี่ในการทำงาน	40kHz<br>
+ระยะสูงสุดที่สามารถวัดได้	4 m (400 cm)<br>
+ระยะต่ำสุดที่สามารถวัดได้	0.02 m (2 cm)<br>
+ความแม่นยำ	±3mm<br>
+องศาในการวัด	15 องศา<br>
+Trigger Input Signal	10us TTL Pulse</p>
+<h2>หลักการทำงารของ HC-SR04</h2>
+เซ็นเซอร์อัลตราโซนิกใช้โซนาร์เพื่อกำหนดระยะห่างจากวัตถุ<br>
+1.เครื่องส่งอัลตราซาวนด์ (พินตรีโกณมิติ) ส่งเสียงความถี่สูง (40 kHz)<br>
+2.เสียงเดินทางผ่านอากาศ หากพบวัตถุ มันจะเด้งกลับไปยังโมดูล<br>
+3.เครื่องรับอัลตราซาวนด์ (echo pin) รับเสียงสะท้อน (echo)<br>
+<div align = "center"><img src="หลักการทำงาน.png"></img></div>
+เวลาระหว่างการส่งและรับสัญญาณทำให้เราสามารถคำนวณระยะทางถึงวัตถุได้ สิ่งนี้เป็นไปได้เพราะเรารู้ความเร็วของเสียงในอากาศ นี่คือสูตร:
+ระยะห่างจากวัตถุ = ((ความเร็วเสียงในอากาศ)*เวลา)/2
+<h2>HC-SR04 Ultrasonic Sensor Pinout</h2>
+<div align = "center"><img src="HC-SR04 Ultrasonic Sensor Pinout.png"></img></div>
+นี่คือ pinout ของเซนเซอร์อัลตราโซนิก HC-SR04<br>
+VCC	:	Powers the sensor (5V)<br>
+Trig	:	Trigger Input Pin<br>
+Echo	:	Echo Output Pin<br>
+GND	:	Common GND<br>
+<p>เซ็นเซอร์นี้ได้รับความนิยมอย่างมากในหมู่นักประดิษฐ์ Arduino เราจะยกตัวอย่างวิธีใช้เซนเซอร์อัลตราโซนิก HC-SR04 กับ Arduino</p>
+<div align = "center"><img src="ตัวอย่าง.PNG" width=600 higth=600></img></div>
+<h2>อุปกรณ์ที่ใช้</h2>
+1.Arduino UNO<br>
+2.Ultrasonic Sensor (HC-SR04)<br>
+3.LCD 16x2 (I2C)<br>
+<h2>Code</h2>
+// YWROBOT<br>
+// Compatible with the Arduino IDE 1.0<br>
+// Library version:1.1<br>
+#include <LiquidCrystal_I2C.h><br>
+LiquidCrystal_I2C lcd(0x27,20,4);<br>
+// set the LCD address to 0x27 for a 16 chars and 2 line display<br>
+float cm;<br>
+float inches;<br>
+long readUltrasonicDistance(int triggerPin, int echoPin)<br>
+{<br>
+	pinMode(triggerPin, OUTPUT);  // Clear the trigger<br>
+	digitalWrite(triggerPin, LOW);<br>
+	delayMicroseconds(2);<br>
+	// Sets the trigger pin to HIGH state for 10 microseconds<br>
+	digitalWrite(triggerPin, HIGH);<br>
+	delayMicroseconds(10);<br>
+	digitalWrite(triggerPin, LOW);<br>
+	pinMode(echoPin, INPUT);<br>
+	// Reads the echo pin, and returns<br>
+	// the sound wave travel time in microseconds<br>
+	return pulseIn(echoPin, HIGH);<br>
+}<br>
+void setup()<br>
+{<br>
+  Serial.begin(9600);<br>
+  lcd.init();	// initialize the lcd<br>
+  // Print a message to the LCD.<br>
+  lcd.backlight();<br>
+  lcd.print("--> Distance <--");<br>
+	delay(3000);<br>
+	lcd.clear();<br>
+}<br>
+void loop()<br>
+{<br>
+  cm = 0.0344/2 * readUltrasonicDistance(3, 2);<br>
+	inches = (cm / 2.54);<br>
+  /*<br>
+	Serial.print("Inches ");<br>
+	Serial.print(inches, 1);<br>
+	Serial.print("\t");<br>
+  Serial.print("cm ");<br>
+	Serial.println(cm, 1);<br>
+	*/<br>
+	lcd.setCursor(0,0);<br>
+	lcd.print("Inches");<br>
+	lcd.setCursor(4,0);<br>
+	lcd.setCursor(12,0);<br>
+	lcd.print("cm");<br>
+	lcd.setCursor(1,1);<br>
+	lcd.print(inches, 1);<br>
+	lcd.setCursor(11,1);<br>
+	lcd.print(cm, 1);<br>
+	lcd.setCursor(14,1);<br>
+	delay(2000);<br>
+	lcd.clear();<br>
+}<br><br>
+<div align = "center"><img src="ทดสอบ.PNG" width=600 higth=600></img></div>
+<h2>ลิงค์อ้างอิง</h2>
+<a href="https://docs.wokwi.com/parts/wokwi-hc-sr04?fbclid=IwAR16Gd5Cem2NUiK3ADmgZtarJ1yiMgw2ZT03cBZw9GoBPFs1Y_kFolaL_sI#operation">https://docs.wokwi.com/parts/wokwi-hc-sr04?fbclid=IwAR16Gd5Cem2NUiK3ADmgZtarJ1yiMgw2ZT03cBZw9GoBPFs1Y_kFolaL_sI#operation</a></p><br>
+<a href="https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/">https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/</a></p><br>
+<h2>จัดทำโดย</h2>
+<a href="สมาชิคกลุ่ม.html">สมาชิคกลุ่ม</a></p><br>
+
+
+
+
+
+
+
+
+</body>
+</html>
+
